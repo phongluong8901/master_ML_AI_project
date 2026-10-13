@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+    <style>
+        /* CSS: Định dạng giao diện cho trang chụp ảnh */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Căn giữa toàn bộ nội dung theo chiều dọc màn hình */
+            height: 100vh;           /* Chiếm toàn bộ chiều cao màn hình */
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #camera {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 240px;            /* Chiều rộng khung hiển thị video camera */
+            height: 280px;           /* Chiều cao khung hiển thị video camera */
+            margin-bottom: 20px;
+            object-fit: cover;       /* Giúp khung hình video không bị méo, tự động cắt vừa khung */
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;        /* Khu vực chứa kết quả trả về sau khi chụp */
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Capture</h1>
+    
+    <!-- Thẻ video để hiển thị luồng hình ảnh trực tiếp từ webcam -->
+    <!-- autoplay: Tự động phát video ngay khi mở trang -->
+    <!-- playsinline: Hỗ trợ hiển thị video trực tiếp trên màn hình di động mà không bị ép bật chế độ toàn màn hình -->
+    <video id="camera" autoplay playsinline></video>
+    
+    <button id="capture">Capture Image</button> <!-- Nút bấm để chụp ảnh -->
+    
+    <!-- Thẻ canvas ẩn (display: none) dùng để chụp và lưu trữ khung hình tạm thời trước khi gửi đi -->
+    <canvas id="canvas" style="display: none;"></canvas>
+    
+    <div id="result"></div> <!-- Khung hiển thị kết quả trả về từ server -->
+
+    <script>
+        // Khai báo các thành phần HTML DOM qua Javascript
+        const video = document.getElementById('camera');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d'); // Công cụ vẽ hình ảnh 2D lên canvas
+        const captureButton = document.getElementById('capture');
+        const resultDiv = document.getElementById('result');
+
+        // Định nghĩa kích thước khung hình video mong muốn (dạng dọc - portrait)
+        const videoWidth = 300; 
+        const videoHeight = 400; 
+
+        // 1. Xin quyền truy cập và bật camera của người dùng bằng Javascript API (getUserMedia)
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: { ideal: videoWidth },   // Kích thước chiều rộng lý tưởng
+                height: { ideal: videoHeight }, // Kích thước chiều cao lý tưởng
+                facingMode: "user"              // Ưu tiên dùng camera trước (nếu trên điện thoại)
+            }
+        })
+        .then(stream => {
+            // Nếu người dùng đồng ý cấp quyền camera: Gắn luồng video (stream) vào thẻ <video>
+            video.srcObject = stream;
+
+            // Thiết lập kích thước hiển thị cho thẻ video
+            video.style.width = `${videoWidth}px`;
+            video.style.height = `${videoHeight}px`;
+        })
+        .catch(error => {
+            // Nếu người dùng từ chối cấp quyền hoặc máy tính không có camera: Hiển thị lỗi ra màn hình
+            console.error('Error accessing the camera', error);
+            resultDiv.innerHTML = `<p style="color: red;">Error accessing the camera. Please ensure that your camera is connected and permissions are granted.</p>`;
+        });
+
+        // 2. Lập trình sự kiện khi người dùng bấm nút "Capture Image"
+        captureButton.addEventListener('click', () => {
+            // Đồng bộ kích thước canvas bằng với kích thước khung hình video
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
+            
+            // Chụp lại khung hình hiện tại tại thời điểm bấm nút và "vẽ" lên thẻ canvas ẩn
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 3. Chuyển đổi dữ liệu từ canvas thành dạng file ảnh nhị phân (Blob) định dạng ảnh
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'capture.jpg'); // Đóng gói ảnh thành dạng file upload có tên 'capture.jpg'
+
+                // 4. Gửi file ảnh này ngầm về server Flask thông qua fetch API (đường dẫn /upload)
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text()) // Nhận kết quả HTML trả về từ server
+                .then(data => {
+                    resultDiv.innerHTML = data;   // Hiển thị kết quả trả về trực tiếp lên trang
+                })
+                .catch(error => {
+                    console.error('Error uploading the image', error);
+                    resultDiv.innerHTML = `<p style="color: red;">Error uploading the image. Please try again.</p>`;
+                });
+            });
+
+        });
+    </script>
+
+</body>
+</html>

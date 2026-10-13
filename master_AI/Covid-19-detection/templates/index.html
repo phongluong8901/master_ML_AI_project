@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- Khai báo đây là trang HTML5 và ngôn ngữ chính là tiếng Anh -->
+<head>
+    <meta charset="UTF-8"> <!-- Định dạng bảng mã ký tự UTF-8 (hỗ trợ tiếng Việt và ký tự đặc biệt) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Giúp trang web hiển thị tối ưu (responsive) trên cả máy tính và điện thoại -->
+    <title>Covid Chest X-Ray Detection</title> <!-- Tiêu đề hiển thị trên tab của trình duyệt web -->
+    
+    <style>
+        /* CSS: Phần định dạng giao diện, màu sắc và bố cục trang web */
+        body {
+            font-family: Arial, sans-serif; /* Kiểu chữ chung cho toàn trang */
+            background-color: #f4f4f4;      /* Màu nền xám nhạt phía sau */
+            margin: 0;
+            padding: 0;
+            display: flex;                  /* Sử dụng Flexbox để căn chỉnh bố cục */
+            flex-direction: column;         /* Sắp xếp các phần tử theo chiều dọc */
+            align-items: center;            /* Căn giữa các phần tử theo chiều ngang */
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;               /* Khung chứa nội dung chính có chiều rộng tối đa 800px */
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #fff;         /* Màu nền trắng cho khung */
+            border-radius: 8px;             /* Bo tròn các góc khung (8 pixel) */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Tạo hiệu ứng đổ bóng nhẹ cho khung */
+        }
+        h1 {
+            color: #333;                    /* Màu chữ tiêu đề chính (xám đậm) */
+            text-align: center;             /* Căn giữa tiêu đề */
+        }
+        form {
+            display: flex;
+            flex-direction: column;         /* Sắp xếp các ô trong form theo chiều dọc */
+            align-items: center;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;            /* Khoảng cách phía dưới nút chọn file */
+        }
+        input[type="submit"] {
+            background-color: #28a745;      /* Màu nền nút bấm (xanh lá cây) */
+            color: #fff;                    /* Màu chữ trên nút (trắng) */
+            border: none;                   /* Bỏ viền mặc định */
+            padding: 10px 20px;             /* Kích thước khoảng đệm bên trong nút */
+            font-size: 16px;
+            cursor: pointer;                /* Đổi con trỏ chuột thành hình bàn tay khi rê vào */
+            border-radius: 5px;             /* Bo tròn nút */
+            transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu mượt mà khi rê chuột */
+        }
+        input[type="submit"]:hover {
+            background-color: #218838;      /* Đổi sang màu xanh đậm hơn khi rê chuột vào nút */
+        }
+        a {
+            color: #007bff;                 /* Màu chữ của đường dẫn (xanh dương) */
+            text-decoration: none;          /* Bỏ gạch chân mặc định của link */
+            font-size: 18px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        a:hover {
+            text-decoration: underline;     /* Hiển thị gạch chân khi rê chuột vào link */
+        }
+    </style>
+</head>
+<body>
+    <div class="container"> <!-- Khung bao bọc toàn bộ nội dung chính của trang web -->
+        
+        <h1>Covid Chest X-Ray Detection</h1> <!-- Tiêu đề lớn hiển thị tên ứng dụng -->
+        <p style="text-align:center">Covid, Viral Pneumonia, Normal</p> <!-- Dòng chữ nhỏ chú thích các bệnh mà mô hình hỗ trợ nhận diện -->
+        
+        <!-- Form gửi file ảnh lên server Flask -->
+        <!-- action="{{ url_for('upload_file') }}": Khi bấm nút submit, dữ liệu sẽ được gửi đến hàm upload_file trong app.py -->
+        <!-- method="post": Phương thức gửi dữ liệu bảo mật (POST) -->
+        <!-- enctype="multipart/form-data": Bắt buộc phải có thuộc tính này khi form có chứa chức năng tải file lên -->
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*"> <!-- Nút chọn tệp, chỉ cho phép chọn file hình ảnh (image/*) -->
+            <input type="submit" value="Upload Image">        <!-- Nút bấm xác nhận tải ảnh lên và dự đoán -->
+        </form>
+        
+        <!-- Đường dẫn (link) chuyển sang trang mở camera chụp ảnh trực tiếp -->
+        <a href="{{ url_for('camera') }}">Open Camera</a>
+        
+    </div>
+</body>
+</html>

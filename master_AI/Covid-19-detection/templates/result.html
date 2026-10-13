@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Result</title> <!-- Tiêu đề hiển thị trên tab trình duyệt -->
+    <style>
+        /* CSS: Thiết kế giao diện và hiệu ứng động cho trang kết quả */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;     /* Màu nền xám sáng */
+            margin: 0;
+            padding: 0;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;       /* Căn giữa toàn bộ nội dung */
+            height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-transform: uppercase;     /* Chữ viết hoa toàn bộ tiêu đề "RESULTS" */
+            letter-spacing: 1px;           /* Khoảng cách giữa các chữ cái */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng chữ */
+        }
+        .result-container {
+            background-color: white;       /* Khung chứa kết quả có nền màu trắng */
+            padding: 30px;
+            border-radius: 15px;           /* Bo tròn góc khung mượt mà (15px) */
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1); /* Đổ bóng sâu tạo cảm giác nổi khối */
+            max-width: 450px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in-out; /* Hiệu ứng mờ dần xuất hiện khi tải trang */
+        }
+        @keyframes fadeIn {                /* Định nghĩa hiệu ứng chuyển động xuất hiện */
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        img {
+            border: 2px solid #ddd;        /* Viền xám nhạt bao quanh ảnh X-quang */
+            border-radius: 10px;           /* Bo tròn góc ảnh */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 70%;                /* Giới hạn chiều rộng ảnh chiếm tối đa 70% khung */
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        img:hover {
+            transform: scale(1.05);        /* Phóng to nhẹ 5% khi rê chuột vào bức ảnh */
+        }
+        .prediction-result {
+            background-color: #007bff;     /* Màu nền xanh dương cho khối hiển thị kết quả */
+            color: white;                  /* Chữ màu trắng */
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.3em;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.3s ease;
+        }
+        .prediction-result:hover {
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        h2, h3 {
+            margin: 10px 0;
+        }
+        h2 {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        h3 {
+            font-size: 1.5em;
+            color: #333;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        a:hover {
+            background-color: #007bff;     /* Đổi màu nền nút quay về thành xanh dương khi rê chuột */
+            color: white;                  /* Đổi màu chữ thành trắng */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container"> <!-- Khung bao bọc toàn bộ phần kết quả -->
+        
+        <h1>Results</h1> <!-- Tiêu đề trang kết quả -->
+        
+        <!-- Hiển thị lại bức ảnh mà người dùng vừa tải lên -->
+        <!-- url_for('uploaded_file', filename=filename): Gọi hàm Flask để lấy file ảnh từ thư mục uploads hiển thị lên web -->
+        <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image">
+        
+        <div class="prediction-result"> <!-- Khung chứa thông tin chẩn đoán của AI -->
+            
+            <h2>Predicted Status:</h2>
+            <!-- Hiển thị tên nhãn bệnh do Flask truyền sang (ví dụ: Covid, Normal,...) nằm trên nền vàng, chữ đen -->
+            <p style="background:yellow; width:35%; margin-left:30%; color:black;">{{ predicted_label }}</p>
+            
+            <h3>Confidence Score:</h3>
+            <!-- Hiển thị độ tự tin của mô hình (được định dạng nhân với 100 và lấy 2 chữ số thập phân: '%.2f' % ...) -->
+            <p style="background:yellow; width:35%; margin-left:30%; color:black;"> {{ '%.2f' % (confidence_score * 100) }}%</p>
+
+        </div>
+        
+        <br>
+        
+        <!-- Nút bấm/đường dẫn quay trở lại trang chủ (home) để upload ảnh tiếp theo -->
+        <a href="{{ url_for('home') }}">Back to Home</a>
+        
+    </div>
+</body>
+</html>
